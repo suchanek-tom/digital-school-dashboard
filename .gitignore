@@ -1,0 +1,53 @@
+# Logs and frontend build output
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Java and Maven build output
+HELP.md
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Generated build directories
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IDE files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.idea
+*.iws
+*.iml
+*.ipr
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# IDE directories and VS Code files
+backend/nbproject/private/
+backend/nbbuild/
+backend/nbdist/
+backend/.nb-gradle/
+**/.vscode/*
+!**/.vscode/extensions.json
+
+.env
