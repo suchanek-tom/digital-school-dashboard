@@ -1,0 +1,108 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DOCKER_PROFILE: docker_dev
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_RESTART_POLL_INTERVAL: 2s
+      SPRING_DEVTOOLS_RESTART_QUIET_PERIOD: 1s
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SERVER_PORT: 8081
+      DB_PORT: ${DB_PORT}
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      APPLICATION_SECURITY_JWT_SECRETKEY: ${JWT_SECRET_KEY}
+      APPLICATION_SECURITY_JWT_EXPIRATION: ${JWT_EXPIRATION}
+      APPLICATION_SECURITY_JWT_REFRESHTOKEN_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      APPLICATION_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+    networks:
+      - spring-postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/pom.xml:/app/pom.xml
+      - ./backend/lombok.config:/app/lombok.config
+      - maven-cache:/root/.m2
+      - ./backend/logs:/logs
+      # Anonymous volume keeps the rest of target/ in the container; only classes/ is shared with the host.
+      - /app/target
+      - ./backend/target/classes:/app/target/classes
+
+  db:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_DB: digital_dashboard
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d digital_dashboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - db-data:/var/lib/postgresql
+    networks:
+      - spring-postgres
+    ports:
+      - "5432:5432"
+
+  frontend-admin:
+    build:
+      context: ./frontend/packages
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_WS_URL: ws://localhost:8081/ws
+      VITE_API_URL: http://localhost:8081
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./frontend/packages/admin-panel/src:/app/admin-panel/src
+      - ./frontend/packages/admin-panel/index.html:/app/admin-panel/index.html
+      - ./frontend/packages/admin-panel/vite.config.ts:/app/admin-panel/vite.config.ts
+      - ./frontend/packages/admin-panel/tsconfig.json:/app/admin-panel/tsconfig.json
+      - ./frontend/packages/admin-panel/tsconfig.app.json:/app/admin-panel/tsconfig.app.json
+      - ./frontend/packages/admin-panel/tsconfig.node.json:/app/admin-panel/tsconfig.node.json
+
+  frontend-display:
+    build:
+      context: ./frontend/packages
+      dockerfile: Dockerfile.dev
+    command: ["npm", "run", "dev", "--workspace=display-client", "--", "--host", "0.0.0.0", "--port", "3000", "--strictPort"]
+    environment:
+      VITE_WS_URL: ws://localhost:8081/ws
+      VITE_API_URL: http://localhost:8081
+    ports:
+      - "3001:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./frontend/packages/display-client/src:/app/display-client/src
+      - ./frontend/packages/display-client/index.html:/app/display-client/index.html
+      - ./frontend/packages/display-client/vite.config.ts:/app/display-client/vite.config.ts
+      - ./frontend/packages/display-client/tsconfig.json:/app/display-client/tsconfig.json
+      - ./frontend/packages/display-client/tsconfig.app.json:/app/display-client/tsconfig.app.json
+      - ./frontend/packages/display-client/tsconfig.node.json:/app/display-client/tsconfig.node.json
+
+volumes:
+  db-data: {}
+  maven-cache: {}
+
+networks:
+  spring-postgres: {}

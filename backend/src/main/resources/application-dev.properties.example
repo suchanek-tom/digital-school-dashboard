@@ -1,0 +1,17 @@
+spring.web.error.include-message=always
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+server.port=
+
+# JWT Configuration
+# generate key with: openssl rand -base64 32
+JWT_SECRET_KEY=
+# expirations are in seconds
+JWT_EXPIRATION=
+JWT_REFRESH_EXPIRATION=
+
+
+application.cors.allowed-origins=
+
+app.docker-profile=none

@@ -1,0 +1,23 @@
+FROM eclipse-temurin:25-jdk
+
+WORKDIR /app
+
+ENV SPRING_DEVTOOLS_RESTART_POLL_INTERVAL=2s
+ENV SPRING_DEVTOOLS_RESTART_QUIET_PERIOD=1s
+
+COPY --chmod=0755 mvnw mvnw
+COPY .mvn/ .mvn/
+
+# Copy pom.xml first so the dependency layer is cached.
+COPY pom.xml .
+RUN ./mvnw dependency:go-offline -DskipTests
+
+# Overridden by bind mounts in docker-compose.dev.yml.
+COPY . .
+# COPY . . replaces mvnw with the host copy, which is not executable (mode 644).
+RUN chmod +x mvnw
+
+EXPOSE 8081
+
+# Reload relies on the host IDE recompiling into the bind-mounted target/classes.
+CMD ["./mvnw", "spring-boot:run", "-Dspring.devtools.restart.enabled=true"]

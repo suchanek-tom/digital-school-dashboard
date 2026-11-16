@@ -51,3 +51,4 @@ backend/.nb-gradle/
 !**/.vscode/extensions.json
 
 .env
+application-dev.properties
