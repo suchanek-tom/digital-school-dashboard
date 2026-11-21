@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, LockKeyhole, CircleAlert } from 'lucide-react'
@@ -29,20 +28,14 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#E3F2FD]">
-      {/* Horní lišta */}
       <header className="bg-[#0D47A1] px-6 py-4 text-white">
         <h1 className="text-2xl font-bold md:text-3xl">
           Digitální nástěnka
         </h1>
       </header>
 
-      {/* Hlavní obsah */}
       <main className="flex min-h-[calc(100vh-68px)] items-center justify-center px-4 py-8">
-
-        {/* Přihlašovací karta */}
         <section className="w-full max-w-[460px] rounded-2xl border border-[#90CAF9] bg-white p-6 shadow-lg sm:p-8">
-
-          {/* Ikona zámku */}
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#90CAF9] bg-[#E3F2FD]">
             <LockKeyhole
               size={30}
@@ -51,7 +44,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Nadpis */}
           <h2 className="mb-2 text-3xl font-bold text-[#0D47A1] sm:text-4xl">
             Přihlášení
           </h2>
@@ -60,10 +52,7 @@ export default function LoginPage() {
             Zadejte e-mail a heslo pro přístup k nástěnce.
           </p>
 
-          {/* Přihlašovací formulář */}
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-
-            {/* E-mail */}
             <div className="mb-5">
               <label
                 htmlFor="email"
@@ -81,11 +70,11 @@ export default function LoginPage() {
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 className={`w-full rounded-lg border-2 px-4 py-3 text-base outline-none transition-colors ${
                   errors.email
-                    ? 'border-red-500 bg-red-50 text-red-900 placeholder:text-red-400 focus:border-red-600 focus:ring-2 focus:ring-red-200'
+                    ? 'border-[#90CAF9] border-b-red-500 bg-white text-[#0D47A1] placeholder:text-[#2196F3] focus:border-b-red-600'
                     : 'border-[#90CAF9] text-[#0D47A1] placeholder:text-[#2196F3] focus:border-[#2196F3] focus:ring-2 focus:ring-[#90CAF9]'
                 }`}
                 {...register('email', {
-                  required: 'Zadejte e-mail.',
+                  required: 'Zapomněli jste zadat e-mail',
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                     message: 'Zadejte platnou e-mailovou adresu.',
@@ -105,7 +94,6 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Heslo */}
             <div className="mb-4">
               <label
                 htmlFor="password"
@@ -126,15 +114,14 @@ export default function LoginPage() {
                   }
                   className={`w-full rounded-lg border-2 px-4 py-3 pr-14 text-base outline-none transition-colors ${
                     errors.password
-                      ? 'border-red-500 bg-red-50 text-red-900 placeholder:text-red-400 focus:border-red-600 focus:ring-2 focus:ring-red-200'
+                      ? 'border-[#90CAF9] border-b-red-500 bg-white text-[#0D47A1] placeholder:text-[#2196F3] focus:border-b-red-600'
                       : 'border-[#90CAF9] text-[#0D47A1] placeholder:text-[#2196F3] focus:border-[#2196F3] focus:ring-2 focus:ring-[#90CAF9]'
                   }`}
                   {...register('password', {
-                    required: 'Zadejte heslo.',
+                    required: 'Zapomněli jste zadat heslo',
                   })}
                 />
 
-                {/* Zobrazení / skrytí hesla */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -175,19 +162,20 @@ export default function LoginPage() {
               </a>
             </div>
 
-            {/* Přihlašovací tlačítko */}
             <button
               type="submit"
               className="w-full cursor-pointer rounded-lg bg-[#2196F3] px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-[#0D47A1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D47A1]"
             >
               Přihlásit se
             </button>
-
           </form>
         </section>
       </main>
     </div>
   )
 }
+
+
+
 
 
