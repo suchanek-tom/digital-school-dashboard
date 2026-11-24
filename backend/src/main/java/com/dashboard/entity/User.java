@@ -50,7 +50,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
 
-    @Column(name = "is_first_login")
+    @Column(name = "is_first_login", nullable = false)
     private Boolean isFirstLogin;
 
     public User(String password, String email) {
@@ -62,6 +62,7 @@ public class User implements UserDetails {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.isFirstLogin = true;
     }
 
     @Override
