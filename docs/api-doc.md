@@ -177,3 +177,64 @@ Most handled errors use the following JSON structure:
 }
 ```
 
+## Device pairing endpoints
+
+### POST `/api/v1/devices/pair/init`
+
+Called by a display device (TV) to start pairing. Creates a pairing request with status `PENDING` and a 6-character code (letters `A–Z` and digits `0–9`). The device shows this code on screen.
+
+**Authentication:** Public
+
+**Request body:** None
+
+**Success response:** `200 OK`
+
+```json
+{
+  "code": "X7K9P2",
+  "expiresInMinutes": 5
+}
+```
+
+| Field              | Type    | Description                                                                                              |
+| ------------------ | ------- | -------------------------------------------------------------------------------------------------------- |
+| `code`             | string  | 6-character pairing code                                                                                 |
+| `expiresInMinutes` | integer | Code lifetime in minutes, derived from the `PAIRING_CODE_EXPIRATION` setting (configured in seconds)     |
+
+---
+
+### POST `/api/v1/devices/pair/confirm`
+
+Called by the admin panel to confirm a code shown on a device. The code must exist, still be valid and be in status `PENDING`. The status is changed to `DELIVERING` atomically, so a code can be confirmed only once, and a new paired device is created.
+
+**Authentication:** Required
+
+**Required header:**
+
+```http
+Authorization: Bearer <access_token>
+```
+
+**Request body:**
+
+```json
+{
+  "code": "X7K9P2"
+}
+```
+
+The code is case-insensitive and must be exactly 6 characters.
+
+**Success response:** `202 Accepted`
+
+```json
+{
+  "uid": "b3f1c2a4-8d7e-4c55-9a0b-1e2f3a4b5c6d"
+}
+```
+
+`uid` is the UUID of the newly created paired device.
+
+**Possible errors:** `400 Bad Request` if the code is blank or not 6 characters long, or does not exist, has expired or has already been used. `401 Unauthorized` for missing or invalid authentication.
+
+---
