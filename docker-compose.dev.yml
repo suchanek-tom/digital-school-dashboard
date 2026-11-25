@@ -23,6 +23,7 @@ services:
       APPLICATION_SECURITY_JWT_EXPIRATION: ${JWT_EXPIRATION}
       APPLICATION_SECURITY_JWT_REFRESHTOKEN_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       APPLICATION_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      PAIRING_CODE_EXPIRATION: ${PAIRING_CODE_EXPIRATION}
     networks:
       - spring-postgres
     depends_on:
@@ -83,7 +84,19 @@ services:
     build:
       context: ./frontend/packages
       dockerfile: Dockerfile.dev
-    command: ["npm", "run", "dev", "--workspace=display-client", "--", "--host", "0.0.0.0", "--port", "3000", "--strictPort"]
+    command:
+      [
+        "npm",
+        "run",
+        "dev",
+        "--workspace=display-client",
+        "--",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "3000",
+        "--strictPort",
+      ]
     environment:
       VITE_WS_URL: ws://localhost:8081/ws
       VITE_API_URL: http://localhost:8081

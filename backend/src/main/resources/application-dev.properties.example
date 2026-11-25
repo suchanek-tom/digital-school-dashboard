@@ -14,4 +14,7 @@ JWT_REFRESH_EXPIRATION=
 
 application.cors.allowed-origins=
 
+# expirations are in seconds
+app.paring-code-expiration=
+
 app.docker-profile=none
