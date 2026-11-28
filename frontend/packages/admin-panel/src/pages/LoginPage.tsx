@@ -1,29 +1,64 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, LockKeyhole, CircleAlert } from 'lucide-react'
+import { Navigate, useLocation } from 'react-router-dom'
+import {
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  LockKeyhole,
+  CircleAlert,
+} from 'lucide-react'
+import { login } from '../api/auth'
+import { getLoginErrorMessage } from '../api/errors'
+import { useAuthStore } from '../store/authStore'
 
 type LoginFormData = {
   email: string
   password: string
 }
 
+type LocationState = {
+  from?: { pathname: string; search?: string; hash?: string }
+} | null
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const token = useAuthStore((state) => state.token)
+  const setSession = useAuthStore((state) => state.setSession)
+  const location = useLocation()
+
+  const from = (location.state as LocationState)?.from
+  const redirectTo = from
+    ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+    : '/'
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   })
 
-  const onSubmit = (data: LoginFormData) => {
-    // TODO: Napojení na autentizační API
-    console.log('Formulář je validní', {
-      email: data.email,
-    })
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null)
+
+    try {
+      const accessToken = await login(data.email.trim(), data.password)
+      // Uložení tokenu aktualizuje store, ostatní se děje níže: přihlášený
+      // uživatel je přesměrován na stránku, ze které přišel (nebo na /).
+      setSession(accessToken)
+    } catch (error) {
+      setServerError(getLoginErrorMessage(error))
+    }
+  }
+
+  // Už přihlášený uživatel (i po úspěšném přihlášení) /login nevidí.
+  if (token) {
+    return <Navigate to={redirectTo} replace />
   }
 
   return (
@@ -162,11 +197,34 @@ export default function LoginPage() {
               </a>
             </div>
 
+            {serverError && (
+              <div
+                role="alert"
+                className="mb-5 flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+              >
+                <CircleAlert
+                  size={18}
+                  className="mt-0.5 shrink-0"
+                  aria-hidden="true"
+                />
+                {serverError}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full cursor-pointer rounded-lg bg-[#2196F3] px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-[#0D47A1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D47A1]"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#2196F3] px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-[#0D47A1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D47A1] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Přihlásit se
+              {isSubmitting && (
+                <LoaderCircle
+                  size={20}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              {isSubmitting ? 'Přihlašování…' : 'Přihlásit se'}
             </button>
           </form>
         </section>
